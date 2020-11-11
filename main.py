@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Name: ~ Quizazello ~
-# About: This script will help you create a quiz
+# About: This is a simple script for creating great tests and quizzes.
 # Author: Igor Markin
 # Blog: https://de0.ru
 # Email: 9588604@gmail.com
@@ -11,70 +11,94 @@ from collections import Counter
 from difflib import SequenceMatcher
 from random import choice
 
-# Файл сохранений
-DB_SAVE_FILE = 'quiz_save.dat'
-
-# Файл с базой данных
-DB_FILE = 'quiz_db.dat'
-
-# Точность проверки ответа
-ACCURACY = 0.80
-
-# Количества подсказок до проигрыша
-COUNT_HINTS = 4
-
-# Базовый бонус за правильный ответ (+ длина слова)
-WIN_PRICE = 5
+settings = {
+    'QUIZ_DB': 'quiz_db.dat',
+    'SAVE_DB': 'save_questions.dat',
+    'ACCURACY': 0.8,
+    'COUNT_HINTS': 4,
+    'WIN_PRICE': 5
+}
 
 
-class Quizazello:
+class Questions:
 
-    def __init__(self, question, answer):
-        self.question = question
-        self.answer = answer
+    def __init__(self):
+        self.quiz_db = list()
 
-    def get_hint(self, move):
-        letters = Counter(list(self.answer)).most_common()
+    @staticmethod
+    def check_save():
+        try:
+            with open(settings['SAVE_DB'], 'r', encoding='utf-8') as db:
+                pass
+            return True
+        except FileNotFoundError:
+            return False
+
+    def load_db(self, filename):
+        try:
+            with open(filename, 'r', encoding='utf-8') as db:
+                for line in db:
+                    line = line.replace('\n', '').split('|')
+                    self.quiz_db.append(tuple(line))
+        except FileNotFoundError:
+            print('Error: file not found')
+
+    def save_db(self):
+        try:
+            with open(settings['SAVE_DB'], 'w', encoding='utf-8') as db:
+                db.write('~ Quizazello ~')
+                for line in self.quiz_db:
+                    db.write('\n' + '|'.join(line))
+            return True
+        except IOError:
+            print('Error: failed to create file')
+
+    def get_question(self, line):
+        return self.quiz_db[line]
+
+    def get_random_question(self):
+        return choice(self.quiz_db)
+
+    @staticmethod
+    def get_hint(answer, step):
+        letters = Counter(list(answer)).most_common()
         if (' ', 1) in letters:
             letters.remove((' ', 1))
-        for i in range(move, len(letters)):
-            hint = self.answer.replace(letters[i][0], '*')
-        return hint
-
-    def get_list(self):
-        return tuple((self.question, self.answer))
+        for i in range(step, len(letters)):
+            answer = answer.replace(letters[i][0], '*')
+        return answer
 
 
-def load_db(filename):
-    try:
-        with open(filename, 'r', encoding='utf-8') as db:
-            list_db = []
-            for line in db:
-                line = line.replace('\n', '').split('|')
-                list_db.append(line)
-        return list_db
-    except FileNotFoundError:
-        press_enter('Файл базы данных не найден.')
+class QuizDB:
+
+    @staticmethod
+    def load_db(filename):
+        try:
+            with open(filename, 'r', encoding='utf-8') as db:
+                quiz_db = list()
+                for line in db:
+                    line = line.replace('\n', '').split('|')
+                    quiz_db.append(line)
+            return quiz_db
+        except FileNotFoundError:
+            print('Error: file not found')
+
+    @staticmethod
 
 
-def save_db(list_db):
-    try:
-        with open(DB_SAVE_FILE, 'w', encoding='utf-8') as db:
-            db.write(f'{points}|{record}')
-            for line in list_db:
-                db.write('\n' + '|'.join(line))
-        return True
-    except IOError:
-        press_enter('Игру не удалось сохранить.')
-
-
-def hint(answer, round_num):
-    list_answer = Counter(list(answer)).most_common()
-    if (' ', 1) in list_answer:
-        list_answer.remove((' ', 1))
-    for i in range(round_num, len(list_answer)):
-        answer = answer.replace(list_answer[i][0], '*')
-    return answer
+    def select_db(db_save_true):
+        if db_save_true:
+            number = input('Загрузить сохранённую игру?\n'
+                           'Enter. Да, загрузить | 1. Начать новую игру | 0. Выход\n'
+                           'Ваш ответ: ')
+            if number == '':
+                return DB_SAVE_FILE
+            elif number == '1':
+                return DB_FILE
+            else:
+                press_enter('')
+        else:
+            return DB_FILE
 
 
 def check_db_save():
@@ -84,21 +108,6 @@ def check_db_save():
         return False
     else:
         return True
-
-
-def select_db(db_save_true):
-    if db_save_true:
-        number = input('Загрузить сохранённую игру?\n'
-                       'Enter. Да, загрузить | 1. Начать новую игру | 0. Выход\n'
-                       'Ваш ответ: ')
-        if number == '':
-            return DB_SAVE_FILE
-        elif number == '1':
-            return DB_FILE
-        else:
-            press_enter('')
-    else:
-        return DB_FILE
 
 
 def press_enter(text):
@@ -115,7 +124,8 @@ def check_commands(text):
 
 
 def check_similarity(answer, text):
-    ratio_similarity = SequenceMatcher(None, answer.lower(), text.lower()).ratio()
+    ratio_similarity = SequenceMatcher(None, answer.lower(),
+                                       text.lower()).ratio()
     return ratio_similarity
 
 
@@ -167,7 +177,21 @@ def start_screen():
 
 if __name__ == '__main__':
 
-    play_game = True
+    quiz = Questions()
+    quiz.load_db(settings['QUIZ_DB'])
+    quiz.save_db()
+    if quiz.check_save():
+        select = ''
+        while select not in ('y', 'n'):
+            select = input('Load save? y/n')
+            if select == 'y':
+                quiz.load_db(settings['SAVE_DB'])
+            elif select == 'n':
+                quiz.load_db(settings['QUIZ_DB'])
+    else:
+        quiz.load_db(settings['QUIZ_DB'])
+
+    '''play_game = True
 
     while play_game:
         start_screen()
@@ -190,7 +214,8 @@ if __name__ == '__main__':
                 print(f'\nПравильно, "{question[1]}". Вы заработали {cost}✪.')
                 points += cost
             else:
-                print(f'\nВы не угадали правильный ответ - "{question[1]}" и потеряли {cost}✪.')
+                print(
+                    f'\nВы не угадали правильный ответ - "{question[1]}" и потеряли {cost}✪.')
                 points -= cost
 
             del questions[questions.index(question)]
@@ -198,4 +223,4 @@ if __name__ == '__main__':
             if points > record:
                 record = points
 
-            save_db(questions)
+            save_db(questions)'''

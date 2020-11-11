@@ -1,4 +1,4 @@
-# Quizazello
+# Quizazello 🤯
 This is a simple script for creating great tests and quizzes.
 
 ## Features
@@ -8,6 +8,7 @@ This is a simple script for creating great tests and quizzes.
 - Helps players if they don't know the correct answer
 - Allows players to misspell words (configurable)
 - Gives points and penalties for answers
+- Understands commands: "exit -s" - to exit with saving
 
 ## Installation
 Please make sure you see all files.
