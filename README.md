@@ -1,5 +1,13 @@
 # Quizazello
-This is a simple script for making great tests and quizzes.
+This is a simple script for creating great tests and quizzes.
+
+## Features
+- Reads databases and asks players questions at random
+- Removes questions from the list so that they do not repeat
+- Saves the remaining questions in a file
+- Helps players if they don't know the correct answer
+- Allows players to misspell words (configurable)
+- Gives points and penalties for answers
 
 ## Installation
 Please make sure you see all files.
@@ -12,3 +20,7 @@ Please make sure you see all files.
 - Name: Igor Markin
 - Blog: https://de0.ru
 - Email: 9588604@gmail.com
+
+## What's next
+- Add mini-games
+- Create Telegram Bot
