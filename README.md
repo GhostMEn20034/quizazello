@@ -8,7 +8,6 @@ This is a simple script for creating great tests and quizzes.
 - Helps players if they don't know the correct answer
 - Allows players to misspell words (configurable)
 - Gives points and penalties for answers
-- Understands commands: "exit -s" - to exit with saving
 
 ## Installation
 Please make sure you see all files.
@@ -17,11 +16,15 @@ Please make sure you see all files.
 - main.py
 - quiz_db.dat
 
-## Author
-- Name: Igor Markin
-- Blog: https://de0.ru
-- Email: 9588604@gmail.com
+## Commands
+- "exit" to exit without saving
+- "exit -s" - to exit with saving
 
 ## What's next
 - Add mini-games
 - Create Telegram Bot
+
+## Author
+- Name: Igor Markin
+- Blog: https://de0.ru
+- Email: 9588604@gmail.com
