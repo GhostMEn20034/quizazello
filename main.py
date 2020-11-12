@@ -49,7 +49,8 @@ class Questions:
                 for line in db:
                     line = line.replace('\n', '').split('|')
                     self.quiz_db.append(tuple(line))
-            self.points, self.record = self.quiz_db[0]
+            self.points = int(self.quiz_db[0][0])
+            self.record = int(self.quiz_db[0][1])
             del self.quiz_db[0]
         except FileNotFoundError:
             print('Error: file not found')
@@ -113,10 +114,10 @@ class Screens:
 
     @staticmethod
     def status(points, record, question_, cost_):
-        print(f'\nУ вас {points} ✪ | '
-              f'Рекорд {record} ✪ | '
-              f'Стоимость вопроса - {cost_} ✪')
-        print(f'Вопрос: {question_}.')
+        print(f'\nYou have {points} ✪ | '
+              f'Your record is {record} ✪ | '
+              f'You can earn {cost_} ✪')
+        print(f'Question: {question_}.')
 
 
 if __name__ == '__main__':
@@ -127,7 +128,7 @@ if __name__ == '__main__':
     if quiz.check_save():
         select = ''
         while select not in ('y', 'n'):
-            select = input('\nLoad save? (y/n): ')
+            select = input('\nDo you want to load a save file? (y/n): ')
             if select == 'y':
                 quiz.load_db(SAVE_DB)
             elif select == 'n':
@@ -149,7 +150,7 @@ if __name__ == '__main__':
             screen.status(quiz.points, quiz.record, question[0], quiz.cost)
 
             for i in range(ROUNDS):
-                user_answer = input('Ваш ответ: ')
+                user_answer = input('Your answer: ')
 
                 quiz.run(user_answer)
 
@@ -158,19 +159,19 @@ if __name__ == '__main__':
                     break
 
                 quiz.points -= HINT_COST
-                print(f'\nНет, не "{user_answer}". '
-                      f'Вы потеряли {HINT_COST} ✪ за неправильный ответ.')
+                print(f'\nNo, not "{user_answer}". You lost {HINT_COST} ✪.')
 
                 if i < ROUNDS - 1:
                     print(f'Hint: {quiz.get_hint(question[1], i)}.')
             else:
-                input('\nУвы, вы не угадали правильный ответ. Press Enter...')
+                input('\nSorry, you have not guessed the correct answer. '
+                      'Press Enter...')
                 break
 
             quiz.delete_question(question)
 
-            input(f'\nПравильно, "{question[1]}". '
-                  f'Вы заработали {quiz.cost} ✪. Press Enter...')
+            input(f'\nThat is right - "{question[1]}". '
+                  f'You have earned {quiz.cost} ✪. Press Enter...')
 
             if quiz.points > quiz.record:
                 quiz.record = quiz.points
