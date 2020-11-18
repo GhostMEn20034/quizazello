@@ -10,7 +10,7 @@ Version 0.6
 import sys
 from collections import Counter
 from difflib import SequenceMatcher as SMatcher
-from random import choice
+from random import choice, randint
 
 QUIZ_DB = 'quiz_db.dat'
 SAVE_DB = 'save_questions.dat'
@@ -18,6 +18,7 @@ ACCURACY = 0.8
 ROUNDS = 4
 WIN_COST = 10
 HINT_COST = 3
+GAME_CHANCE = 0  # 0-100
 
 
 class Question:
@@ -65,7 +66,7 @@ class Question:
 class Service:
 
     @staticmethod
-    def run(questions, command):
+    def run(question, command):
         commands = {
             '/exit': 'Questions not saved.',
             '/exit -s': 'Questions saved.'
@@ -76,7 +77,7 @@ class Service:
                 input(f'\n{commands[command]} Press Enter to exit...')
                 sys.exit()
             elif command == '/exit -s':
-                questions.save_db()
+                question.save_db()
                 input(f'\n{commands[command]} Press Enter to exit...')
                 sys.exit()
 
@@ -111,17 +112,17 @@ class Service:
         return similarity
 
     @staticmethod
-    def check_answer(questions):
+    def check_answer(question):
         for i in range(ROUNDS):
             user_answer = input('Your answer: ')
 
-            Service.run(command=user_answer, questions=questions)
+            Service.run(command=user_answer, question=question)
 
-            if Service.similarity(questions.answer, user_answer) >= ACCURACY:
-                questions.points += questions.cost
+            if Service.similarity(question.answer, user_answer) >= ACCURACY:
+                question.points += question.cost
                 return True
 
-            questions.points -= HINT_COST
+            question.points -= HINT_COST
             print(f'\nNo, not "{user_answer}". You lost {HINT_COST} ✪.')
 
             if i < ROUNDS - 1:
@@ -132,20 +133,25 @@ class Service:
             return False
 
     @staticmethod
-    def correct_answer(questions):
-        questions.delete_question((questions.question, questions.answer))
-        input(f'\nThat is right - "{questions.answer}". '
-              f'You earned {questions.cost} ✪. Press Enter...')
+    def correct_answer(question):
+        question.delete_question((question.question, question.answer))
+        input(f'\nThat is right - "{question.answer}". '
+              f'You earned {question.cost} ✪. Press Enter...')
 
-        if questions.points > questions.record:
-            questions.record = questions.points
+        if question.points > question.record:
+            question.record = question.points
 
-        questions.save_db()
+        question.save_db()
 
     @staticmethod
-    def start_round(questions):
-        questions.question, questions.answer = questions.get_random_question()
-        questions.cost = WIN_COST + len(questions.answer)
+    def start_round(question):
+        question.question, question.answer = question.get_random_question()
+        question.cost = WIN_COST + len(question.answer)
+
+    @staticmethod
+    def random_game(question):
+        if 1 < randint(1, 100) <= GAME_CHANCE:
+            Game.guess_number(question)
 
 
 class Screen:
@@ -169,6 +175,23 @@ class Screen:
         print(f'Question: {question_}.')
 
 
+class Game:
+
+    @staticmethod
+    def guess_number(question):
+        random_number = randint(1, 10)
+        user_number = ''
+        while not user_number.isdigit():
+            user_number = input(f'\nGuess a number from 1 to 10: ')
+        if int(user_number) == random_number:
+            print(f'Good! You wined {question.cost} ✪')
+            question.points += question.cost
+            input('Press Enter...')
+        else:
+            input('Sorry! You lost. Press Enter...')
+        return True
+
+
 if __name__ == '__main__':
 
     quiz = Question()
@@ -181,10 +204,12 @@ if __name__ == '__main__':
         play_round = True
         while play_round:
 
-            Service.start_round(questions=quiz)
+            Service.start_round(question=quiz)
+            Service.random_game(quiz)
             Screen.status(points=quiz.points, record=quiz.record,
                           question_=quiz.question, cost_=quiz.cost)
-            if not Service.check_answer(questions=quiz):
+
+            if not Service.check_answer(question=quiz):
                 break
             else:
-                Service.correct_answer(questions=quiz)
+                Service.correct_answer(question=quiz)
