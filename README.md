@@ -1,4 +1,4 @@
-# Quizazello v0.5 🤯
+# Quizazello v0.6 🤯
 This is a simple script for creating great tests and quizzes.
 
 ## Features

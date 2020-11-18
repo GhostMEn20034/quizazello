@@ -4,8 +4,7 @@ About: This is a simple script for creating great tests and quizzes.
 Author: Igor Markin
 Blog: https://de0.ru
 Email: 9588604@gmail.com
-Version 0.5
-
+Version 0.6
 """
 
 import sys
@@ -18,30 +17,18 @@ SAVE_DB = 'save_questions.dat'
 ACCURACY = 0.8
 ROUNDS = 4
 WIN_COST = 10
-HINT_COST = 5
+HINT_COST = 3
 
 
-class Questions:
+class Question:
 
     def __init__(self):
         self.quiz_db = list()
+        self.question = ''
+        self.answer = ''
         self.cost = 0
         self.points = 0
         self.record = 0
-
-        self.commands = {
-            '/exit': 'Questions are not saved.',
-            '/exit -s': 'Questions are saved.'
-        }
-
-    @staticmethod
-    def check_save():
-        try:
-            with open(SAVE_DB, 'r', encoding='utf-8'):
-                pass
-            return True
-        except FileNotFoundError:
-            return False
 
     def load_db(self, filename):
         try:
@@ -74,8 +61,42 @@ class Questions:
     def delete_question(self, deleted_question):
         self.quiz_db.remove(deleted_question)
 
+
+class Service:
+
     @staticmethod
-    def get_hint(answer, step):
+    def run(questions, command):
+        commands = {
+            '/exit': 'Questions not saved.',
+            '/exit -s': 'Questions saved.'
+        }
+
+        if command in commands.keys():
+            if command == '/exit':
+                input(f'\n{commands[command]} Press Enter to exit...')
+                sys.exit()
+            elif command == '/exit -s':
+                questions.save_db()
+                input(f'\n{commands[command]} Press Enter to exit...')
+                sys.exit()
+
+    @staticmethod
+    def select_db():
+        try:
+            with open(SAVE_DB, 'r', encoding='utf-8'):
+                pass
+            select = ''
+            while select not in ('y', 'n'):
+                select = input('\nDo you want to load a save file? (y/n): ')
+                if select == 'y':
+                    return SAVE_DB
+                elif select == 'n':
+                    return QUIZ_DB
+        except FileNotFoundError:
+            return QUIZ_DB
+
+    @staticmethod
+    def hint(answer, step):
         letters = Counter(list(answer)).most_common()
         if (' ', 1) in letters:
             letters.remove((' ', 1))
@@ -84,25 +105,53 @@ class Questions:
         return answer
 
     @staticmethod
-    def get_similarity(answer, user_answer_):
+    def similarity(answer, user_answer_):
         similarity = SMatcher(None, answer.lower(),
                               user_answer_.lower()).ratio()
         return similarity
 
-    def run(self, command):
-        if command in self.commands.keys():
-            if command == '/exit':
-                input(f'\n{self.commands[command]} Press Enter to exit...')
-                sys.exit()
-            elif command == '/exit -s':
-                quiz.save_db()
-                input(f'\n{self.commands[command]} Press Enter to exit...')
-                sys.exit()
+    @staticmethod
+    def check_answer(questions):
+        for i in range(ROUNDS):
+            user_answer = input('Your answer: ')
+
+            Service.run(command=user_answer, questions=questions)
+
+            if Service.similarity(questions.answer, user_answer) >= ACCURACY:
+                questions.points += questions.cost
+                return True
+
+            questions.points -= HINT_COST
+            print(f'\nNo, not "{user_answer}". You lost {HINT_COST} ✪.')
+
+            if i < ROUNDS - 1:
+                print(f'Hint: {Service.hint(quiz.answer, i)}.')
+        else:
+            input('\nSorry, you not guessed the correct answer. '
+                  'Press Enter...')
+            return False
+
+    @staticmethod
+    def correct_answer(questions):
+        questions.delete_question((questions.question, questions.answer))
+        input(f'\nThat is right - "{questions.answer}". '
+              f'You earned {questions.cost} ✪. Press Enter...')
+
+        if questions.points > questions.record:
+            questions.record = questions.points
+
+        questions.save_db()
+
+    @staticmethod
+    def start_round(questions):
+        questions.question, questions.answer = questions.get_random_question()
+        questions.cost = WIN_COST + len(questions.answer)
 
 
-class Screens:
+class Screen:
 
-    def __init__(self):
+    @staticmethod
+    def start_screen():
         print('=' * 52)
         print('============ WELCOME TO ~ QUIZAZELLO ~ =============')
         print('=' * 52)
@@ -122,58 +171,20 @@ class Screens:
 
 if __name__ == '__main__':
 
-    quiz = Questions()
-    screen = Screens()
-
-    if quiz.check_save():
-        select = ''
-        while select not in ('y', 'n'):
-            select = input('\nDo you want to load a save file? (y/n): ')
-            if select == 'y':
-                quiz.load_db(SAVE_DB)
-            elif select == 'n':
-                quiz.load_db(QUIZ_DB)
-    else:
-        quiz.load_db(QUIZ_DB)
+    quiz = Question()
+    Screen.start_screen()
+    quiz.load_db(filename=Service.select_db())
 
     play_game = True
-
     while play_game:
 
         play_round = True
-
         while play_round:
 
-            question = quiz.get_random_question()
-            quiz.cost = WIN_COST + len(question[1])
-
-            screen.status(quiz.points, quiz.record, question[0], quiz.cost)
-
-            for i in range(ROUNDS):
-                user_answer = input('Your answer: ')
-
-                quiz.run(user_answer)
-
-                if quiz.get_similarity(question[1], user_answer) >= ACCURACY:
-                    quiz.points += quiz.cost
-                    break
-
-                quiz.points -= HINT_COST
-                print(f'\nNo, not "{user_answer}". You lost {HINT_COST} ✪.')
-
-                if i < ROUNDS - 1:
-                    print(f'Hint: {quiz.get_hint(question[1], i)}.')
-            else:
-                input('\nSorry, you have not guessed the correct answer. '
-                      'Press Enter...')
+            Service.start_round(questions=quiz)
+            Screen.status(points=quiz.points, record=quiz.record,
+                          question_=quiz.question, cost_=quiz.cost)
+            if not Service.check_answer(questions=quiz):
                 break
-
-            quiz.delete_question(question)
-
-            input(f'\nThat is right - "{question[1]}". '
-                  f'You have earned {quiz.cost} ✪. Press Enter...')
-
-            if quiz.points > quiz.record:
-                quiz.record = quiz.points
-
-            quiz.save_db()
+            else:
+                Service.correct_answer(questions=quiz)
