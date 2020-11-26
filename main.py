@@ -11,6 +11,7 @@ import sys
 from collections import Counter
 from difflib import SequenceMatcher as SMatcher
 from random import choice
+
 import settings
 
 
