@@ -4,15 +4,15 @@ from .services import Game
 
 
 def index(request):
-    if request.session.session_key is None:
+    if not request.session.session_key:
+        question = Game.get_random_question()
         request.session['step'] = 0
         request.session['right'] = 0
         request.session['wrong'] = 0
         request.session['hint'] = ''
-        request.session['question'] = ''
-        request.session['answer'] = ''
+        request.session['question'] = question.question
+        request.session['answer'] = question.answer
 
-    session_key = request.session.session_key
     result = 'Вопрос:'
 
     if request.method == 'POST':
@@ -34,6 +34,9 @@ def index(request):
             request.session['step'] = 0
             request.session['hint'] = ''
             request.session['wrong'] += 1
+
+        if request.POST['answer'] == '/reset':
+            request.session.flush()
 
     if request.session['step'] == 0:
         question = Game.get_random_question()
