@@ -10,7 +10,6 @@ class Game:
     question = ''
     answer = ''
     question_number = 0
-    step = 0
     questions_count = Quiz.objects.count()
 
     @staticmethod

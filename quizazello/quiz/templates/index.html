@@ -27,13 +27,13 @@
 		<main role="main" class="inner cover">
 			<div class="alert alert-dark">
 				<p>Правильных ответов: {{ right }}. Неправильных: {{ wrong }}.</p>
-				<h3 class="alert-heading">{{ result|safe }}</h3> {% if hint != '' %}
-				<p class="lead">Подсказка: {{ hint }}</p> {% endif %}
+				<h3>{% if result %}{{ result|safe }}{% endif %}</h3>
 				<p class="lead"><strong>{{ question }}</strong></p>
+				{% if hint != '' %}<p class="lead">Подсказка: {{ hint }}</p> {% endif %}
 				<form action="/" method="post"> {% csrf_token %}
 					<div class="input-group mb-3">
 						<input type="text" name="answer" class="form-control" placeholder="Введите здесь ваш ответ" autofocus>
-						<button type="submit" value="submit" class="btn btn-dark">Ответить</button> </div>
+						&nbsp;<button type="submit" value="submit" class="btn btn-dark">Ответить</button> </div>
 				</form>
 			</div>
 		</main>

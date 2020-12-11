@@ -6,53 +6,56 @@ from .services import Game
 def index(request):
     if not request.session.session_key:
         question = Game.get_random_question()
-        request.session['step'] = 0
-        request.session['right'] = 0
-        request.session['wrong'] = 0
-        request.session['hint'] = ''
         request.session['question'] = question.question
         request.session['answer'] = question.answer
-
-    result = 'Вопрос:'
-
-    if request.method == 'POST':
-        request.session['step'] += 1
+        request.session['step'] = 0
         request.session['hint'] = Game.get_hint(request.session['answer'],
                                                 request.session['step'])
+        request.session['result'] = 'Вопрос:'
+        request.session['right'] = 0
+        request.session['wrong'] = 0
 
+    if request.method == 'POST':
         if Game.correct_answer(request.session['answer'],
                                request.POST['answer']):
-            result = f'Правильно — {request.session["answer"]}!'
+            request.session['result'] = ('Правильно: '
+                                         f'{request.session["answer"]}! '
+                                         'Поехали дальше.')
             request.session['step'] = 0
-            request.session['hint'] = ''
             request.session['right'] += 1
+            question = Game.get_random_question()
+            request.session['question'] = question.question
+            request.session['answer'] = question.answer
+            request.session['hint'] = Game.get_hint(request.session['answer'],
+                                                    request.session['step'])
         else:
-            result = 'Неправильно! Вот подсказка:'
+            request.session['result'] = 'Неправильно. Попробуйте ещё.'
+            request.session['step'] += 1
+            request.session['hint'] = Game.get_hint(request.session['answer'],
+                                                    request.session['step'])
 
         if request.session['step'] >= 3:
-            result = f'Вы не угадали: {request.session["answer"]}!'
+            request.session['result'] = ('Не угадали: '
+                                         f'{request.session["answer"]}. '
+                                         'Поехали дальше.')
+            question = Game.get_random_question()
+            request.session['question'] = question.question
+            request.session['answer'] = question.answer
             request.session['step'] = 0
-            request.session['hint'] = ''
+            request.session['hint'] = Game.get_hint(request.session['answer'],
+                                                    request.session['step'])
             request.session['wrong'] += 1
 
-        if request.POST['answer'] == '/reset':
-            request.session.flush()
-
-    if request.session['step'] == 0:
-        question = Game.get_random_question()
-        request.session['question'] = question.question
-        request.session['answer'] = question.answer
+    request.session.modified = True
 
     context = {
         'question': request.session['question'],
         'answer': request.session['answer'],
-        'result': result,
         'hint': request.session['hint'],
+        'result': request.session['result'],
         'step': request.session['step'],
         'right': request.session['right'],
         'wrong': request.session['wrong'],
     }
-
-    request.session.modified = True
 
     return render(request, 'index.html', context)
