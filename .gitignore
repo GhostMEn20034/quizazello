@@ -126,3 +126,4 @@ dmypy.json
 
 save_questions.dat
 settings.py
+static/
