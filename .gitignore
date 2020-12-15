@@ -125,3 +125,4 @@ venv.bak/
 dmypy.json
 
 save_questions.dat
+settings.py

@@ -4,8 +4,8 @@ from .services import Game
 
 
 def index(request):
-    if not request.session.session_key:
-        question = Game.get_random_question()
+    if not request.session.session_key:  # можно хранить словарь
+        question = Game.get_random_question()  # попробовать через БД
         request.session['question'] = question.question
         request.session['answer'] = question.answer
         request.session['step'] = 0
@@ -47,15 +47,17 @@ def index(request):
             request.session['wrong'] += 1
 
     request.session.modified = True
+    step = 3 - request.session['step']
 
     context = {
         'question': request.session['question'],
         'answer': request.session['answer'],
         'hint': request.session['hint'],
         'result': request.session['result'],
-        'step': request.session['step'],
+        'step': step,
         'right': request.session['right'],
         'wrong': request.session['wrong'],
+        'a': a,
     }
 
     return render(request, 'index.html', context)

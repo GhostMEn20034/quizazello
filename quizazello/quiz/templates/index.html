@@ -2,47 +2,64 @@
 <html lang="ru">
 
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>The Quizazello — Demo</title> {% load static %}
-	<link rel="stylesheet" href="https://getbootstrap.com/docs/4.5/dist/css/bootstrap.min.css">
-	<script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
-	<script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
-	<style>
-	body {
-		background-image: url('{% static "bg.jpg" %}');
-	}
-	</style>
-	<!-- Custom styles for this template -->
-	<link href="{% static 'cover/cover.css' %}" rel="stylesheet"> </head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>The Quizazello — Demo</title> {% load static %}
+    <link rel="stylesheet"
+          href="https://getbootstrap.com/docs/4.5/dist/css/bootstrap.min.css">
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <style>
+        body {
+            background-image: url('{% static "bg.jpg" %}');
+        }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="{% static 'cover/cover.css' %}" rel="stylesheet">
+</head>
 
 <body class="text-center">
-	<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-		<header class="masthead mb-auto">
-			<div class="inner">
-				<h3 class="masthead-brand">The Quizazello — Demo</h3>
-				<nav class="nav nav-masthead justify-content-center"> <a class="nav-link" href="https://github.com/igor-markin/quizazello">Git</a> <a class="nav-link" href="https://de0.ru/">Blog</a> <a class="nav-link" href="https://t.me/de0ru">Telegram</a> <a class="nav-link" href="https://www.youtube.com/channel/UCQejlZ1K59n1vFAMntNTOLQ">Youtube</a> </nav>
-			</div>
-		</header>
-		<main role="main" class="inner cover">
-			<div class="alert alert-dark">
-				<p>Правильных ответов: {{ right }}. Неправильных: {{ wrong }}.</p>
-				<h3>{% if result %}{{ result|safe }}{% endif %}</h3>
-				<p class="lead"><strong>{{ question }}</strong></p>
-				{% if hint != '' %}<p class="lead">Подсказка: {{ hint }}</p> {% endif %}
-				<form action="/" method="post"> {% csrf_token %}
-					<div class="input-group mb-3">
-						<input type="text" name="answer" class="form-control" placeholder="Введите здесь ваш ответ" autofocus>
-						&nbsp;<button type="submit" value="submit" class="btn btn-dark">Ответить</button> </div>
-				</form>
-			</div>
-		</main>
-		<footer class="mastfoot mt-auto">
-			<div class="inner">
-				<p><a href="mailto:9588604@gmail.com">Email for feedback</a></p>
-			</div>
-		</footer>
-	</div>
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+        <div class="inner">
+            <h3 class="masthead-brand">The Quizazello — Demo</h3>
+            <nav class="nav nav-masthead justify-content-center"><a
+                    class="nav-link"
+                    href="https://github.com/igor-markin/quizazello">Git</a> <a
+                    class="nav-link" href="https://de0.ru/">Blog</a> <a
+                    class="nav-link" href="https://t.me/de0ru">Telegram</a> <a
+                    class="nav-link"
+                    href="https://www.youtube.com/channel/UCQejlZ1K59n1vFAMntNTOLQ">Youtube</a>
+            </nav>
+        </div>
+    </header>
+    <main role="main" class="inner cover">
+        <div class="alert alert-dark">
+            <p>Правильных ответов: {{ right }}. Неправильных: {{ wrong }}.
+                Сложение: {{ a }}</p>
+            <h3>{% if result %}{{ result|safe }}{% endif %}</h3>
+            <p class="lead"><strong>{{ question }}</strong></p>
+            <p class="lead">Подсказка: {{ hint }}. Осталось попыток: {{ step
+                }}</p>
+            <form action="/" method="post"> {% csrf_token %}
+                <div class="input-group mb-3">
+                    <input type="text" name="answer" class="form-control"
+                           placeholder="Введите здесь ваш ответ" autofocus
+                           required>
+                    &nbsp;<button type="submit" value="submit"
+                                  class="btn btn-dark">Ответить
+                </button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <footer class="mastfoot mt-auto">
+        <div class="inner">
+            <p><a href="mailto:9588604@gmail.com">Email for feedback</a></p>
+        </div>
+    </footer>
+</div>
 </body>
 
 </html>

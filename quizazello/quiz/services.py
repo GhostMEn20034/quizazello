@@ -6,7 +6,6 @@ from .models import Quiz
 
 
 class Game:
-
     question = ''
     answer = ''
     question_number = 0
@@ -22,7 +21,7 @@ class Game:
     def correct_answer(answer, user_answer):
         similarity = SMatcher(None, answer.lower(),
                               user_answer.lower())
-        if similarity.ratio() >= 0.8:
+        if similarity.ratio() >= 0.8:  # можно один возврат
             return True
         else:
             return False
