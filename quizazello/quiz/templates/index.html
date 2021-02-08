@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ru">
-
+{% load user_filters %}
 <head>
     <meta charset="utf-8">
     <meta name="viewport"
@@ -8,8 +8,7 @@
     <title>The Quizazello — Demo</title> {% load static %}
     <link rel="stylesheet"
           href="https://getbootstrap.com/docs/4.5/dist/css/bootstrap.min.css">
-    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
-    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+
     <style>
         body {
             background-image: url('{% static "bg.jpg" %}');
@@ -36,12 +35,10 @@
     </header>
     <main role="main" class="inner cover">
         <div class="alert alert-dark">
-            <p>Правильных ответов: {{ right }}. Неправильных: {{ wrong }}.
-                Сложение: {{ a }}</p>
-            <h3>{% if result %}{{ result|safe }}{% endif %}</h3>
-            <p class="lead"><strong>{{ question }}</strong></p>
-            <p class="lead">Подсказка: {{ hint }}. Осталось попыток: {{ step
-                }}</p>
+            <p>Правильных ответов: {{ request.session.right }}. Неправильных: {{ request.session.wrong }}.</p>
+            <h3>{{ request.session.result|safe }}</h3>
+            <p class="lead"><strong>{{ request.session.question }}</strong></p>
+            <p class="lead">Подсказка: {{ request.session.hint }}. Осталось попыток: {{ request.session.step|step:"4" }}</p>
             <form action="/" method="post"> {% csrf_token %}
                 <div class="input-group mb-3">
                     <input type="text" name="answer" class="form-control"
