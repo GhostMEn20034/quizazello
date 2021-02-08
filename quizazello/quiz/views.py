@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from .services import Game
+from .services import start_new_game
 
 
 def index(request):
@@ -18,3 +18,16 @@ def index(request):
 
     request.session.modified = True
     return render(request, 'index.html')
+
+
+def undex(request):
+    if not request.session.session_key:
+        start_new_game(request)
+
+    if request.method == 'POST':
+        player_answer = request.POST['answer']
+        correct_answer = request.session['answer']
+        check_player_answer(player_answer, correct_answer)
+
+    return render(request, 'index.html')
+
